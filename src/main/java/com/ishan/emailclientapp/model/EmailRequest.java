@@ -15,7 +15,7 @@ import lombok.Setter;
 public class EmailRequest {
 
     private String from;
-    private String to;
+    private List<String> to;
     private List<String> cc;
     private List<String> bcc;
     private String subject;
