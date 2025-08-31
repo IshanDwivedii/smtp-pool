@@ -1,0 +1,91 @@
+spring:
+  application:
+    name: smtp-pool-client
+  
+  # SMTP Configuration with Connection Pooling
+  mail:
+    # Default SMTP server (for backward compatibility)
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USERNAME:your-email@gmail.com}
+    password: ${SMTP_PASSWORD:your-app-password}
+    
+    # Connection Pool Configuration
+    pool:
+      maxTotal: 20          # Maximum total connections
+      maxIdle: 10           # Maximum idle connections
+      minIdle: 5            # Minimum idle connections
+      maxWaitMillis: 30000  # Max wait time for connection (30 seconds)
+      timeBetweenEvictionRunsMillis: 60000    # Eviction run interval (1 minute)
+      minEvictableIdleTimeMillis: 300000      # Min idle time before eviction (5 minutes)
+      testOnBorrow: true    # Test connection when borrowing
+      testOnReturn: false   # Test connection when returning
+      testWhileIdle: true   # Test idle connections
+      maxConnectionsPerServer: 5  # Max connections per SMTP server
+    
+    # Multiple SMTP Servers Configuration
+    servers:
+      - name: gmail-primary
+        host: smtp.gmail.com
+        port: 587
+        username: ${SMTP_USERNAME:your-email@gmail.com}
+        password: ${SMTP_PASSWORD:your-app-password}
+        enabled: true
+        weight: 2
+        ssl: false
+        startTls: true
+        connectionTimeout: 30000
+        readTimeout: 30000
+        
+      - name: gmail-secondary
+        host: smtp.gmail.com
+        port: 465
+        username: ${SMTP_USERNAME:your-email@gmail.com}
+        password: ${SMTP_PASSWORD:your-app-password}
+        enabled: true
+        weight: 1
+        ssl: true
+        startTls: false
+        connectionTimeout: 30000
+        readTimeout: 30000
+        
+      - name: outlook
+        host: smtp-mail.outlook.com
+        port: 587
+        username: ${OUTLOOK_USERNAME:your-email@outlook.com}
+        password: ${OUTLOOK_PASSWORD:your-password}
+        enabled: false  # Disabled by default
+        weight: 1
+        ssl: false
+        startTls: true
+        connectionTimeout: 30000
+        readTimeout: 30000
+
+# Logging Configuration
+logging:
+  level:
+    com.ishan.emailclientapp: DEBUG
+    org.apache.commons.pool2: INFO
+    org.springframework.mail: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# Actuator Configuration for Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,pool-stats
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
